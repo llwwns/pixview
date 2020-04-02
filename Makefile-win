@@ -1,21 +1,24 @@
-all: target-win/package/pixview.exe
+all: target-win/deploy/pixview.exe
 
 target-win:
 	mkdir target-win
 target-win/build.ninja: target-win CMakeLists.txt
-	cd target-win && cmake -DCMAKE_BUILD_TYPE=Release .. -GNinja
+	cd target-win && cmake -DCMAKE_BUILD_TYPE=Debug .. -GNinja
 
-target-win/pixview.exe: target-win/build.ninja
+target-win/pixview.exe: target-win/build.ninja *.cpp *.h
 	cd target-win && ninja
 
 target-win/deploy:
 	mkdir target-win\deploy
 
 target-win/deploy/pixview.exe: target-win/pixview.exe target-win/deploy
-	copy .\target-win\pixview.exe .\target-win\deploy\pixview.exe && windeployqt --no-translations .\target-win\deploy\pixview.exe
+	copy .\target-win\pixview.exe .\target-win\deploy\pixview.exe
 
-run: target-win/deploy/pixview.exe
-	.\target-win\deploy\pixview.exe
+deploy: target-win/deploy/pixview.exe
+	windeployqt --no-translations .\target-win\deploy\pixview.exe
+
+run: target-win/pixview.exe
+	.\target-win\pixview.exe
 
 clean:
 	rmdir /s /q target-win

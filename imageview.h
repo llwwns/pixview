@@ -3,8 +3,9 @@
 #include <QMainWindow>
 #include <QSize>
 #include <QImage>
-#include "setting.h"
 #include <memory>
+#include "setting.h"
+#include "viewstate.h"
 
 QT_BEGIN_NAMESPACE
 class QResizeEvent;
@@ -24,9 +25,9 @@ public:
 	virtual ~ImageView();
     void resizeEvent(QResizeEvent* event) override;
 
-
 private slots:
     void loadImage(QImage);
+    void contextMenu();
 
 private:
     std::unique_ptr<QGraphicsPixmapItem> pixmapItem;
@@ -35,5 +36,6 @@ private:
     QGraphicsView* view;
     ImageWorker* worker;
     const static int MAX_TEXTURE_SIZE = 4096 * 4096;
-    Setting setting;
+    ViewState state;
+    void resetLib();
 };

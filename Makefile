@@ -5,14 +5,14 @@ target-linux:
 target-linux/build.ninja: target-linux CMakeLists.txt
 	cd target-linux && cmake .. -GNinja
 
-target-linux/pixview: target-linux/build.ninja
+target-linux/pixview: target-linux/build.ninja *.h *.cpp
 	cd target-linux && ninja
 
 run:target-linux/pixview
 	./target-linux/pixview
 
 compile_commands.json: target-linux/build.ninja
-	ln -s ./target-linux/compile_commands.json
+	ln -s -f ./target-linux/compile_commands.json
 
 clean:
 	rm -r compile_commands.json target-linux
