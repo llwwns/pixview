@@ -101,6 +101,9 @@ void ImageView::contextMenu() {
                 resetLib();
                 this->state.mutex.unlock();
             });
+        } else {
+            act->setCheckable(true);
+            act->setChecked(true);
         }
     }
 	menu.exec(QCursor::pos()+QPoint(1,1));
