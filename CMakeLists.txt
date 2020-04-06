@@ -11,7 +11,6 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt5 COMPONENTS OpenGL REQUIRED)
 
 include_directories("third-party/toml11")
 
@@ -30,5 +29,4 @@ add_executable(pixview WIN32
         )
 
 target_link_libraries(pixview
-        Qt5::Widgets
-        Qt5::OpenGL)
+        Qt5::Widgets)

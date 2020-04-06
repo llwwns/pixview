@@ -7,7 +7,7 @@ ImageWorker::ImageWorker(ViewState *state, QObject *parent): state(state), QThre
 }
 
 void ImageWorker::timeout() {
-    state->mutex.lock();
+    auto _l = state->getReadLock();
     int c = state->lib->count();
     std::uniform_int_distribution<int> distribution(0, state->lib->count() - 1);
     auto i = distribution(generator);
@@ -16,7 +16,6 @@ void ImageWorker::timeout() {
         loadImage(image);
     }
     timer.singleShot(state->setting.interval, this, &ImageWorker::timeout);
-    state->mutex.unlock();
 }
 
 void ImageWorker::run() {

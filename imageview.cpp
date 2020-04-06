@@ -7,7 +7,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
-#include <QtOpenGL/QtOpenGL>
 #include <QPalette>
 #include <QImage>
 #include <QResizeEvent>
@@ -21,8 +20,6 @@ ImageView::ImageView(): pixmapItem(std::make_unique<QGraphicsPixmapItem>())
     scene->addItem(pixmapItem.get());
     view = new MainView(this);
     view->setScene(scene);
-    auto viewport = new QOpenGLWidget(view);
-	view->setViewport(viewport);
     view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::LosslessImageRendering);
 	QPalette p = view->viewport()->palette();
 	p.setColor(QPalette::Window,QColor(0, 0, 0));
@@ -35,6 +32,10 @@ ImageView::ImageView(): pixmapItem(std::make_unique<QGraphicsPixmapItem>())
     view->fitInView(pixmapItem.get(), Qt::KeepAspectRatio);
     setCentralWidget(view);
     state.setting = Setting::load();
+    if (state.setting.fullscreen) {
+       setWindowFlag(Qt::FramelessWindowHint, true);
+       showMaximized();
+    }
     resetLib();
     worker = new ImageWorker(&state, this);
     connect(worker, &ImageWorker::loadImage, this, &ImageView::loadImage);
@@ -43,6 +44,7 @@ ImageView::ImageView(): pixmapItem(std::make_unique<QGraphicsPixmapItem>())
 }
 
 void ImageView::resetLib() {
+    auto _l = state.getWriteLock();
     std::unique_ptr<Library> lib;
     for (auto l: state.setting.libraries) {
         if (l.name == state.setting.defaultLibrary) {
@@ -77,6 +79,7 @@ void ImageView::loadImage(QImage image) {
     pixmapItem->setPixmap(QPixmap::fromImage(image));
     pixmapItem->resetTransform();
     static bool rotated = false;
+    auto _r = state.getReadLock();
     if (state.setting.autoRotate && ((view->size().width() > view->size().height()) != (image.width() > image.height()))) {
         if (!rotated) {
             view->rotate(90);
@@ -96,15 +99,33 @@ void ImageView::contextMenu() {
         auto act = menu.addAction(QString::fromStdString(lib.name));
         if (lib.name != state.setting.defaultLibrary) {
             connect(act, &QAction::triggered, this, [=](){
-                this->state.mutex.lock();
+                auto _l = state.getWriteLock();
                 this->state.setting.defaultLibrary = lib.name;
                 resetLib();
-                this->state.mutex.unlock();
             });
         } else {
             act->setCheckable(true);
             act->setChecked(true);
         }
+    }
+    menu.addSeparator();
+    if (state.setting.fullscreen) {
+        auto act = menu.addAction("normal");
+        connect(act, &QAction::triggered, this, [=]() {
+            auto _l = state.getWriteLock();
+            setWindowFlag(Qt::FramelessWindowHint, false);
+            showNormal();
+           state.setting.fullscreen = false;
+        });
+    } else {
+        auto act = menu.addAction("fullscreen");
+        connect(act, &QAction::triggered, this, [=]() {
+            auto _l = state.getWriteLock();
+           setWindowFlag(Qt::FramelessWindowHint, true);
+           setWindowFlag(Qt::WindowSystemMenuHint, true);
+           showMaximized();
+           state.setting.fullscreen = true;
+        });
     }
 	menu.exec(QCursor::pos()+QPoint(1,1));
 }
