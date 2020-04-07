@@ -16,15 +16,16 @@ include_directories("third-party/toml11")
 
 add_executable(pixview WIN32
         main.cpp
-        imageview.h
-        imageview.cpp
+        mainwindow.h
+        mainwindow.cpp
         library.h
         library.cpp
         imageworker.h
         imageworker.cpp
         setting.h
         setting.cpp
-        mainview.h
+        imageview.h
+        imageview.cpp
         viewstate.h
         )
 

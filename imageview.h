@@ -1,41 +1,30 @@
 #pragma once
-
-#include <QMainWindow>
-#include <QSize>
-#include <QImage>
-#include <memory>
-#include "setting.h"
+#include <QGraphicsView>
 #include "viewstate.h"
 
 QT_BEGIN_NAMESPACE
-class QResizeEvent;
-class QGraphicsView;
-class QGraphicsPixmapItem;
+class QWidget;
+class QMouseEvent;
 class QGraphicsScene;
-class QImage;
+class QGraphicsPixmapItem;
 QT_END_NAMESPACE
-class ImageWorker;
 
-class ImageView : public QMainWindow
-{
+class ImageView : public QGraphicsView {
     Q_OBJECT
-
 public:
-	ImageView();
-	virtual ~ImageView();
-    void resizeEvent(QResizeEvent* event) override;
+    ImageView(ViewState* state, QWidget *parent);
+    virtual ~ImageView();
+    void mouseReleaseEvent(QMouseEvent *e);
+    void setImage(QImage);
+    void resized();
 
-private slots:
-    void loadImage(QImage);
-    void contextMenu();
+signals:
+    void rightClicked();
 
 private:
-    std::unique_ptr<QGraphicsPixmapItem> pixmapItem;
-    QGraphicsScene *scene;
-    QSize imageSize;
-    QGraphicsView* view;
-    ImageWorker* worker;
     const static int MAX_TEXTURE_SIZE = 4096 * 4096;
-    ViewState state;
-    void resetLib();
+    ViewState *state;
+    QGraphicsScene *scene;
+    std::unique_ptr<QGraphicsPixmapItem> pixmapItem;
 };
+
